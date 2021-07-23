@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnMapClickListener, OnMapRea
     private var isAdd = false
     private var droneLocationLat: Double = 15.0
     private var droneLocationLng: Double = 15.0
+    private var compass: Double = 0.0
     private var droneMarker: Marker? = null
     private val markers: MutableMap<Int, Marker> = ConcurrentHashMap<Int, Marker>()
     private var gMap: GoogleMap? = null
@@ -143,6 +144,7 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnMapClickListener, OnMapRea
             flightController.setStateCallback { flightControllerState ->
                 droneLocationLat = flightControllerState.aircraftLocation.latitude
                 droneLocationLng = flightControllerState.aircraftLocation.longitude
+                compass = flightController.compass.heading.toDouble()
                 runOnUiThread {
                     updateDroneLocation()
                 }
@@ -156,13 +158,13 @@ class MainActivity : AppCompatActivity(), GoogleMap.OnMapClickListener, OnMapRea
         if (droneLocationLat.isNaN() || droneLocationLng.isNaN()) {
             return
         }
-        infoTextView.text = "LAT: $droneLocationLat LNG: $droneLocationLng"
         val markerOptions = MarkerOptions()
             .position(LatLng(droneLocationLat, droneLocationLng))
             .icon(BitmapDescriptorFactory.fromResource(R.drawable.aircraft))
         runOnUiThread {
             droneMarker?.remove()
             if (checkGpsCoordination(droneLocationLat, droneLocationLng)) {
+                infoTextView.text = "LAT: $droneLocationLat\nLNG: $droneLocationLng\nCompass: $compass"
                 droneMarker = gMap?.addMarker(markerOptions)
             }
         }
